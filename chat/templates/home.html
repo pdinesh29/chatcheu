@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Chat</title>
+</head>
+<body>
+    <h1>Group Chat</h1>
+    <div id="chat-box" style="border: 1px solid black; height: 300px; overflow-y: scroll;"></div>
+    <input type="text" id="message" placeholder="Type a message" />
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        const chatBox = document.getElementById("chat-box");
+        const messageInput = document.getElementById("message");
+        const ws = new WebSocket("ws://localhost:8000/ws/chat/");
+
+        ws.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            const messageElement = document.createElement("div");
+            messageElement.textContent = `${data.user}: ${data.message} [${data.timestamp}]`;
+            chatBox.appendChild(messageElement);
+        };
+
+        ws.onopen = function () {
+            console.log("WebSocket connection established!");
+        };
+
+        ws.onclose = function () {
+            console.log("WebSocket connection closed.");
+        };
+
+        function sendMessage() {
+            const message = messageInput.value;
+            const user = "some_username"; 
+            ws.send(JSON.stringify({ 'message': message, 'user': user }));
+            chatBox.innerHTML+="<div id='left'>"+message+"</div>"
+            messageInput.value = "";
+        }
+
+        // document.getElementById("send-button").addEventListener("click", sendMessage);
+
+    </script>
+</body>
+</html>
